@@ -1,0 +1,321 @@
+Suppose we have a string of lowercase characters "abca".
+We want to determine if all the characters in the string are unique.
+
+Obvious solution: loop over each character one by one and check whether it
+appears anywhere in the rest of the string or not:
+
+int main() {
+    string s;
+    cin >> s;
+    size_t n = s.length();                      // Linear time c0 * n
+    for(size_t i = 0; i < n; i++) {             // Executes n times
+        for(size_t j = i + 1; j < n; j++) {     // Executes n - i - 1 times
+            if(s[j] == s[i]) {                  // Constant time c1
+                cout << "not unique" << endl;   // Constant time c2
+                return 0;                       // Constant time c3
+            }
+        }
+    }
+    cout << "unique" << endl;                   // Constant time c2
+    return 0;                                   // Constant time c3
+}
+
+Run time ≤ c0 * n + c1 * (n-1 + n-2 + ... + 2 + 1 + 0) + c2 + c3
+         ≤ c0 * n + c1 * n(n - 1)/2 + c2 + c3
+         ∈ O(n²)
+So not very fast.
+
+We can use an unordered map in C++, which is a hash table, to keep track of
+which characters we have already seen (using characters as the keys and
+booleans as the values). The run time is then O(n) but the overhead of
+computing the hash function for keys that are single characters will be
+high so the linear term in the run time will have a high constant in
+practice.
+
+Alternatively, we can use an array of booleans to keep track of which
+characters we have already seen (using the character - 'a' as the
+index). Now there is no need to compute any hash function and array
+look-ups are done in Θ(1) running time. So the overall algorithm is still
+O(n) (with a small constant for the linear term) but we use more memory for
+the array than strictly necessary: each array element needs to be
+addressable in memory so a bool uses a whole byte of memory rather than a
+single bit. So we are using 8 times more memory than we actually need to.
+
+
+Bitwise and Bitshifting Operators
+
+Bitshifting:
+
+<< means left shift
+>> means right shift
+
+Let's use only 8 bits for brevity, and start with unsigned integers.
+
+Left shift:
+
+unsigned int a = 11; a << 1;
+
+00001011 (11)
+<< 1 ==
+00010110 (22)
+
+so a << 1 == 22.
+
+Shifting all the bits of an unsigned integer to the left by 1 position is
+equivalent to integer multiplication by 2.  The old leftmost bit is lost,
+the new rightmost bit is zero.
+
+You can obviously shift by more than one position at a time: if the
+variable a is 11 then a << 3 == 88 (shifting to the left by 3 positions is
+equivalent to multiplying by 2³).  Shifting by a negative number of
+positions is undefined.
+
+
+Right shift:
+
+unsigned int a = 11; a >> 1;
+
+00001011 (11)
+>> 1 ==
+00000101 (5)
+
+so a >> 1 == 5.
+
+Shifting all the bits of an unsigned integer to the right by 1 position is
+equivalent to integer division by 2. The old rightmost bit is lost, the new
+leftmost bit is zero.
+
+
+Things are slightly more complicated for signed integers, in the case when
+the integers are negative. Technically speaking, shifting a negative
+integer is undefined in C++ because the C++ standard does not specify how
+negative integers are represented at the bit level.  In practice 99.99% of
+the computers on the planet use the standard 2's complement method for
+representing signed integers, and shifting then works as follows.
+
+Using the 2's complement method for representing signed integers, the
+integer -5 has the following bits:
+
+ 00000101 (5)
+ 11111010 (bit inversion)
++       1
+---------
+ 11111011 (-5)
+
+Left shift:
+
+11111011 (-5)
+<< 1 ==
+11110110 (?)
+
+ 11110110 (?)
+ 00001001 (bit inversion)
++       1
+---------
+ 00001010 (10)
+
+so -5 << 1 == -10.
+
+Shifting all the bits of a signed integer to the left by 1 position is
+equivalent to integer multiplication by 2.  The old leftmost bit is lost,
+the new rightmost bit is zero.
+
+Right shift:
+
+11111011 (-5)
+>> 1 ==
+11111101 (?)
+
+ 11111101 (?)
+ 00000010 (bit inversion)
++       1
+---------
+ 00000011 (3)
+
+so -5 >> 1 == -3.
+
+Shifting all the bits of a signed integer to the right by 1 position is NOT
+equivalent to integer division by 2 (integer division rounds towards zero;
+right-shifting rounds towards minus infinity). The old rightmost bit is
+lost, the new leftmost bit is a copy of the old leftmost bit.
+
+Another example of right-shifting a negative signed integer):
+
+ 00001011 (11)
+ 11110100 (bit inversion)
++       1
+---------
+ 11110101 (-11)
+
+11110101 (-11)
+>> 1 ==
+11111010 (?)
+
+ 11111010 (?)
+ 00000101 (bit inversion)
++       1
+---------
+ 00000110 (6)
+
+so -11 >> 1 == -6.
+
+Again the rounding is towards minus infinity, not zero as for integer
+division.
+
+
+Bitwise operators
+
+& and
+| or
+^ exclusive or
+~ not (negation, bit inversion)
+
+13 & 7
+  00001101 (13)
+& 00000111 (7)
+----------
+  00000101 (5)
+
+13 | 7
+  00001101 (13)
+| 00000111 (7)
+----------
+  00001111 (15)
+
+13 ^ 7
+  00001101 (13)
+^ 00000111 (7)
+----------
+  00001010 (10)
+
+~13
+~ 00001101 (13)
+----------
+  11110010 (?)
+
+  11110010 (?)
+  00001101 (bit inversion)
+ +       1
+ ---------
+  00001110 (14)
+
+So ~13 = -14.
+
+In general: ~x = -x - 1.  This comes directly from the fact that the
+definition of 2's complement method for representing negative integers uses
+bit inversion internally (as can be seen above): -x = ~x + 1.
+
+
+Back to checking whether a string is made of unique characters:
+
+Take the string "gdg".
+We'll start with the first (leftmost) character 'g'.
+
+unsigned int vector = 0;
+unsigned int setter;
+
+Each bit (from right to left) in the vector variable indicates whether the
+corresponding character has already been seen or not.  This requires only
+26 bits of memory for lowercase characters, which can all fit inside a
+single unsigned integer.  Here we use 8 bits only for brevity.
+
+hgfedcba
+00000000 (vector)
+
+The setter variable is used to represent the current character that we want
+to check:
+
+setter = 1 << ('g' - 'a');
+
+01000000 (setter)
+
+'g' - 'a' is the distance between the beginning of the alphabet and the
+character 'g' (with the character 'a' being at distance zero).  Then we
+left-shift the integer 1 by this distance to get a bit representation of
+the character 'g'.
+
+To determine if a character has been seen before, we'll bitwise AND the
+vector and setter:
+
+  00000000 (vector)
+& 01000000 (setter)
+----------
+  00000000
+
+A zero value implies the character 'g' has not been seen before.
+If the character has been seen before then we get back the value of
+setter, which is non-zero.
+
+To set the vector for the next iteration, we must bitwise OR the vector and
+the setter and store the result back in the vector.
+
+  00000000 (vector)
+| 01000000 (setter)
+----------
+  01000000 (-> vector)
+
+This new value of the vector then remembers that we have just seen a 'g' in
+the input string.
+
+Next, take the character 'd' from the string "gdg":
+
+setter = 1 << ('d' - 'a');
+
+  01000000 (vector)
+& 00001000 (setter)
+----------
+  00000000
+
+A zero value implies the character 'd' has not been seen before.
+
+Then we update the vector:
+
+  01000000 (vector)
+| 00001000 (setter)
+----------
+  01001000 (-> vector)
+
+to remember that we have now seen both a 'g' and a 'd' (although we don't
+know in which order, but that does not matter).
+
+Take the second 'g' from the string "gdg":
+
+setter = 1 << ('g' - 'a');
+
+  01001000 (vector)
+& 01000000 (setter)
+----------
+  01000000
+
+The result is the same as the setter and is non-zero, therefore 'g' has been
+seen already.
+ 
+
+Best case: we have twice the same character right at the beginning of the
+string ("tt...").  We make 1 comparison.  (In fact the best case is when
+the input string is empty, then the algorithm's main loop doesn't even run,
+which takes constant time too anyway.)
+
+Worst case: it seems like in the worst case we have to check every
+character in the string and therefore we have to make n comparisons, which
+gives us a running time of O(n) (with a very small constant factor for the
+linear term because bit shifting can be done using a single CPU
+instruction), but in fact this is not true.
+
+In the worst case the first 26 characters in the string are unique.  The
+27th character in the string must then be a duplicate.  Therefore we make
+at most 26 comparisons.
+
+So 1 * c ≤ f(n) ≤ 26 * c
+where c is the amount of time necessary to do one comparison.
+
+Therefore f(n) ∈ Θ(1)
+
+(Note that this in fact true of all the other algorithms we discussed at
+the beginning: any string of lowercase characters of length 27 or more must
+have a duplicate, so all algorithms for finding duplicates are guaranteed
+to find a duplicate when reaching the 27th character in the input.  For
+example, the algorithm with two nested loops at the top of these lecture
+notes is guaranteed to find a duplicate when the outer loop for i reaches
+27 so that algorithm is in fact O(n), which comes from computing the length
+of the string.)

@@ -1,0 +1,253 @@
+Sequential search:
+
+int seq_search(int array[], const int n, int key) {
+    for(int i = 0; i < n; i++) {
+        if(array[i] == key) {
+            return i;
+        }
+    }
+    return -1;
+}
+
+Call p the probability of a successful search (0 ≤ p ≤ 1).
+
+Call q the probability of finding the key in the ith position.  We assume q
+is the same for every i (no array element is favored / special).  Then the
+probability of finding the key in at least one element of the array (a
+successful search) is q + q + ... + q = n * q.  Therefore n * q = p and
+thus q = p / n.
+
+Finding the key in the ith position requires i comparisons (and i loop
+iterations).
+
+The probability of an unsuccessful search is (1 - p) and it requires n
+comparisons (searching the whole array and finding the key nowhere).
+
+The average number of comparisons (and so the average number of times going
+around the loop) is then:
+
+Cavg(n) = (1 * p/n + 2 * p/n + .. + i * p/n + ... + n * p/n) + n(1 - p)
+        = p/n(1 + 2 + ... + i + ... + n) + n(1 - p)
+        = p/n * n(n+1)/2 + n(1 - p)
+        = p(n+1)/2 + n(1 - p)
+
+which is using the following sum computation:
+------------------------------------------------
+ S = 1 +     2     + 3     + ... + n-1   + n
+ S = n +     n-1   + n-2   + ... + 2     + 1
+------------------------------------------------
+2S = (n+1) + (n+1) + (n+1) + ... + (n+1) + (n+1)
+2S = n(n+1)
+ S = n(n+1)/2
+------------------------------------------------
+
+If p = 1 => search is successful, average number of comparisons is (n+1)/2
+If p = 0 => search is unsuccessful, number of comparisons is exactly n, and
+so is n on average as well.
+
+So, regardless of whether the search succeeds or not, the average number of
+comparisons required (and the average number of loop iterations) is
+proportional to n: linear in the size of the input.
+
+We want some nice notation to be able to say "linear in the size of the
+input" without having to worry about the details (the +1 and division by 2
+if the search if successful, exactly n otherwise).  We also want a notation
+where we can say "at most" (which is what most people care about: how much
+they have to wait at most), or "at least", etc.
+
+
+O-notation:
+
+f(n) ∈ O(g(n)) if and only if there exists positive constants c and n₀ such
+that 0 ≤ f(n) ≤ cg(n) for all n ≥ n₀.
+
+So is 10n + 5 ∈ O(n²)? YES
+
+To show that a function is O(g(n)), we need to give values for the positive
+constants c and n₀.
+
+0 ≤ 10n + 5 ≤ 10n + n (∀n ≥ 5) = 11n ≤ 11n²
+c = 11
+n₀ = 5
+
+Note: c and n₀ do not have to be integers, though in practice n often
+represents the size of the algorithm's input which is usually an integer in
+Computer Science.
+
+Alternative approach:
+0 ≤ 10n + 5 ≤ 10n + 5n (∀n ≥ 1) = 15n ≤ 15n²
+c = 15
+n₀ = 1
+
+Note: in practice we usually want the upper bound to be as tight as
+possible by having the same order of growth as the bounded function
+(i.e. prove that 10n + 5 ∈ O(n) rather than 10n + 5 ∈ O(n²)) and with a
+constant c as small as possible.  (This also has the added benefit that
+there is then only one solution, which makes grading easier!)
+
+For example, to prove that 10n + 5 ∈ O(n), we can use (from above):
+0 ≤ 10n + 5 ≤ 10n + n (∀n ≥ 5) = 11n
+c = 11
+n₀ = 5
+and c = 11 is then the smallest integer value of c which works.
+
+Find an upper bound for f(n) = 3n + 8. Looking only at the highest order
+term 3n and disregarding the coefficient, we guess that f(n) ∈ O(n).
+Provide the smallest integer value of c that proves it.
+
+0 ≤ 3n + 8 ≤ 3n + n (∀n ≥ 8) = 4n
+c = 4
+n₀ = 8
+
+The constant c cannot be smaller if we require it to be an integer.  (A
+non-integer constant c like 3.01 would work too to prove that f(n) ∈ O(n)).
+
+Alternatively:
+0 ≤ 3n + 8 ≤ 3n + 8n (∀n ≥ 1) = 11n
+c = 11
+n₀ = 1
+
+This gives us the smallest integer n₀ but not the smallest integer c.
+
+For f(n) = 3n + 8, it is easy to show that c = 4 in in fact the smallest
+integer c that would work (we cannot use c = 3 because of the "+ 8" part
+which is positive).
+
+In general, if f(n) = k nⁱ + something positive, we have a tight upper
+bound O(nⁱ) and we can use k+1 as the constant c (n₀ depends on the rest of
+the definition of f(n)).
+
+Find an upper bound for f(n) = 3n. Looking only at the highest order term
+3n and disregarding the coefficient, we guess that f(n) ∈ O(n).  Provide
+the smallest integer value of c that proves it.
+
+0 ≤ 3n ≤ 3n (∀n ≥ 0)
+c = 3
+n₀ = 1
+
+Note: the mathematical definition of the ) notation requires n₀ to be a
+positive constant, not zero (and is usually an integer in Computer Science,
+as indicated above).
+
+Find an upper bound for f(n) = 3n - 8. Looking only at the highest order
+term 3n and disregarding the coefficient, we guess that f(n) ∈ O(n).
+Provide the smallest integer value of c that proves it.
+
+0 ≤ 3n - 8 ≤ 3n (∀n ≥ 3)
+c = 3
+n₀ = 3
+
+Note: we have 3n - 8 ≤ 3n (∀n), but we must also have 0 ≤ 3n - 8 (according
+to the mathematical definition of the O notation) therefore we must have
+n₀ = 3 (choosing an integer n₀).
+
+In general, if f(n) = k nⁱ - something positive, we have a tight upper
+bound O(nⁱ) and we can use k as the constant c (n₀ depends on the rest of
+the definition of f(n)).
+
+Find an upper bound for f(n) = n² + 1.  Looking only at the highest order
+term n² we guess that f(n) ∈ O(n²).  Provide the smallest integer value of
+c that proves it.
+
+0 ≤ n² + 1 ≤ 2n² (∀n ≥ 1)
+c = 2
+n₀ = 1
+
+Note: n² + 1 ≤ n² + n (∀n ≥ 1) so with c = 1 and n₀ = 1 we get
+f(n) ∈ O(n² + n).  In this case the constant c = 1 is smaller than the
+constant c = 2 just above but the upper bound O(n² + n) is not as tight as
+O(n²).  When n is sufficiently big, n² completely dominates over n, so we
+do not care about that extra n.  So we want first the tightest possible
+upper bound (based on the highest order term in f(n) only), then for this
+tightest upper bound we want the smallest integer c.
+
+
+Ω-notation:
+
+f(n) ∈ Ω(g(n)) if and only if there exists positive constants c and n₀ such
+that 0 ≤ cg(n) ≤ f(n) for all n ≥ n₀.
+
+Here we usually want to find the tightest lower bound by having the same
+order of growth as the bounded function, with then the biggest possible
+integer constant c.
+
+So is n³ ∈ Ω(n²)? YES
+0 ≤ n² ≤ n³ (∀n ≥ 1)
+c = 1
+n₀ = 1
+
+Note: here we cannot select c to be the biggest possible integer constant
+because n² does not have the same order of growth as n³ and therefore n² is
+not the tightest lower bound for n³ (n³ is: n³ ∈ Ω(n³)).  So we just use
+c = 1 to keep things simple.
+
+Find a lower bound for f(n) = 5n². Looking only at the highest order term
+5n² and disregarding the coefficient, we guess that f(n) ∈ Ω(n²).  Provide
+the biggest integer value of c that proves it.
+
+0 ≤ 5n² ≤ 5n² (∀n)
+c = 5
+n₀ = 1
+
+Is f(n) = 10n + 5 ∈ Ω(n²)? NO
+
+To prove that this is not possible, we must prove that there is no possible
+combination of c and n₀ that can ever satisfy the definition of Ω.  In
+other words, we need to prove that 10n + 5 ∈ Ω(n²) does not work for ALL
+possible combinations of c and n₀.  The way to do this is to use a proof by
+contradiction: we assume that there exists some c and n₀ that prove that
+10n + 5 ∈ Ω(n²) and we show that this always leads to a contradiction.
+
+So let's assume that there exists positive constants c and n₀ such that
+0 ≤ cn² ≤ 10n + 5 (∀n ≥ n₀)
+
+We also have 10n + 5 ≤ 10n + 5n (∀n ≥ 1) = 15n
+
+So by combining the two we must have:
+cn² ≤ 15n (∀n ≥ max(n₀, 1))
+cn ≤ 15 (∀n ≥ max(n₀, 1))
+n ≤ 15/c (∀n ≥ max(n₀, 1))
+
+Since n can grow to infinity, it is impossible to find a positive constant
+c such that n is bounded above by the constant 15/c.  Therefore the c we
+need to find does not exist.  Therefore f(n) = 10n + 5 ∉ Ω(n²).
+
+
+Θ-notation:
+
+f(n) ∈ Θ(g(n)) if and only if there exists positive constants c₁ and c₂ and
+n₀ such that 0 ≤ c₁g(n) ≤ f(n) ≤ c₂g(n) for all n ≥ n₀.
+
+So is n(n-1)/2 ∈ Θ(n²)? YES
+
+We prove the upper bound first:
+n(n-1)/2 = n²/2 - n/2 ≤ n²/2 (∀n ≥ 1)
+
+We prove the lower bound next:
+We have: n(n-1)/2 = n²/2 - n/2
+And ∀n ≥ 2 we have: 1 ≤ n/2
+so -1 ≥ -n/2
+so -n/2 ≥ -(n/2)(n/2)
+so n²/2 - n/2 ≥ n²/2 - (n/2)(n/2).
+By combining the two equations we then get:
+n(n-1)/2 = n²/2 - n/2 ≥ n²/2 - (n/2)(n/2) = n²/4 (∀n ≥ 2)
+
+From these upper and lower bounds we get c₁ = 1/4, c₂ = 1/2, and n₀ = 2
+(the maximum of ∀n ≥ 1 for the upper bound and ∀n ≥ 2 for the lower bound).
+
+Note: we are not trying to find integer constants c₁ and c₂ here.  We could
+easily use c₂ = 1 but there is no integer c₁ that would work.
+
+
+Is n ∈ Θ(n²)? NO
+
+Again we need to use a proof by contradiction.  Assume that there exists
+c₁ and c₂ and n₀ such that: c₁n² ≤ n ≤ c₂n² (∀n ≥ n₀)
+
+The first part looks suspicious:
+c₁n² ≤ n (∀n ≥ n₀, with n₀ positive so n is positive too)
+c₁n ≤ 1 (∀n ≥ n₀)
+n ≤ 1/c₁ (∀n ≥ n₀)
+
+Contradiction: n cannot be smaller than a constant when n is allowed to go
+to infinity!
